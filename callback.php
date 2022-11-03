@@ -22,16 +22,16 @@ $token = $token_obj["access_token"];
 $json = json_decode(urldecode(filter_input(INPUT_GET, "state")), true);
 $json["token"] = $token;
 
-$ch = curl_init(getenv("ebrains_bucket") . $json["clb-collab-id"] . "?delimiter=/");
-curl_setopt_array($ch, array(
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_HTTPHEADER => array(
-        "Accept: application/json",
-        "Authorization: Bearer " . $token
-    )
-));
-$files = curl_exec($ch);
-curl_close($ch);
+//$ch = curl_init(getenv("ebrains_bucket") . $json["clb-collab-id"] . "?delimiter=/");
+//curl_setopt_array($ch, array(
+//    CURLOPT_RETURNTRANSFER => true,
+//    CURLOPT_HTTPHEADER => array(
+//        "Accept: application/json",
+//        "Authorization: Bearer " . $token
+//    )
+//));
+//$files = curl_exec($ch);
+//curl_close($ch);
 ?>
 <!DOCTYPE html>
 <html>
@@ -40,14 +40,29 @@ curl_close($ch);
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script>
-            let files =<?php echo $files; ?>;
-            let state =<?php echo json_encode($json); ?>;
-            function startup() {
-                let body="";
-                for(let object of files.objects)
-                    if(object.content_type==="application/json")
-                        body+=`<tr><td><a href="#${object.name}" onclick="clicky(event)">${object.name}</a></td><td>${object.bytes}</td><td>${object.last_modified}</td></tr>`;
-                document.getElementById("bucket-content").innerHTML=body;
+            let state=<?php echo json_encode($json);?>;
+            async function startup(){
+                let bucket=await fetch(
+                        `https://data-proxy.ebrains.eu/api/v1/buckets/${state["clb-collab-id"]}?delimiter=/`,{
+                            headers:{
+                                accept:"application/json",
+                                authorization:`Bearer ${state.token}`
+                            }
+                        }
+                    ).then(response=>response.json());
+                let tbody=document.getElementById("bucket-content");
+//                for(let item of bucket.objects)
+//                    if(item.content_type==="application/json")
+//                        tbody.innerHTML+="<tr><td><button onclick='clicky(event)'>"+item.name+"</button></td><td>"+item.bytes+"</td><td>"+item.last_modified+"</td></tr>";
+                for(let item of bucket.objects)
+                    if(!item.hasOwnProperty("subdir") && item.name.endsWith(".waln"))
+                        tbody.innerHTML+="<tr><td><button onclick='clicky(event)'>"+item.name+"</button></td><td>"+item.bytes+"</td><td>"+item.last_modified+"</td></tr>";
+                for(let item of bucket.objects)
+                    if(!item.hasOwnProperty("subdir") && item.name.endsWith(".wwrp"))
+                        tbody.innerHTML+="<tr><td><button onclick='clicky(event)'>"+item.name+"</button></td><td>"+item.bytes+"</td><td>"+item.last_modified+"</td></tr>";
+//                for(let item of bucket.objects)
+//                    if(!item.hasOwnProperty("subdir") && item.name.endsWith(".json"))
+//                        tbody.innerHTML+="<tr><td><button onclick='clicky(event)'>"+item.name+"</button></td><td>"+item.bytes+"</td><td>"+item.last_modified+"</td></tr>";
             }
             function clicky(event){
                 state.filename=event.target.innerText;
