@@ -1,30 +1,41 @@
-let args = JSON.parse(decodeURIComponent(location.search.substring(1)));
+const args = JSON.parse(decodeURIComponent(location.search.substring(1)));
+const bucket = args["clb-collab-id"];
+const token = args.token;
+let filename = args.filename;
 args.tools = args.nl = true;
-function argspack(pack) {
-    return encodeURIComponent(JSON.stringify({
-        collab: args["clb-collab-id"],
-        token: args.token,
-        ...pack
-    }));
-}
 
-async function getDescriptor() {
-    let download = await fetch(`bucket.php?${argspack({filename: args.filename})}`).then(response => response.json());
-    return fetch(download.url).then(response => response.json());
-}
-
-async function getTile(section, level, x, y) {
-    let json = await fetch(`bucket.php?${argspack({collab: sries.bucket, filename: `${section.base}${level}/${x}_${y}.${section.format}`})}`).then(response => response.json());
-    return new Promise(resolve => {
-        let tile = document.createElement("img");
-        tile.onload = () => resolve(tile);
-        tile.src = json.url;
-    });
+async function dpurlget(bucketfile){
+    return fetch(
+        `https://data-proxy.ebrains.eu/api/v1/buckets/${bucketfile}?redirect=false`,
+        {headers: {authorization: `Bearer ${token}`}}).then(response => response.json());
 }
 
 let sries;
 let sections;
 let atlas;
+
+//function argspack(pack) {
+//    return encodeURIComponent(JSON.stringify({
+//        collab: args["clb-collab-id"],
+//        token: args.token,
+//        ...pack
+//    }));
+//}
+
+async function getDescriptor() {
+    const download = await dpurlget(bucket+"/"+filename);
+    return fetch(download.url).then(response => response.json());
+}
+
+async function getTile(section, level, x, y) {
+    const download = await dpurlget(`${sries.bucket}/${section.base}${level}/${x}_${y}.${section.format}`);
+    return new Promise(resolve => {
+        const tile = document.createElement("img");
+        tile.onload = () => resolve(tile);
+        tile.src = download.url;
+    });
+}
+
 async function startup() {
     window.addEventListener("resize", fullscreen);
     fullscreen();
@@ -179,7 +190,7 @@ function dispatchSection(section) {
     meta.innerHTML = /*ouv.name*/section.filename + "<br>" + cfg.Width.toString() + " x " + cfg.Height.toString() + "<br>"
             + atlas.name;
 //            + (args.prev ? "" : ("<br><a href='http://cmbn-navigator.uio.no/navigator/feeder/original/?id=" + section_id + "' target='_blank'>Download image</a>"));
-    meta.style.left = window.innerWidth - meta.scrollWidth - 5 + "px";
+//    meta.style.left = window.innerWidth - meta.scrollWidth - 5 + "px";
 
 //    var w = cfg.Width;
 //    var h = cfg.Height;
@@ -772,22 +783,43 @@ function load() {
 //        else
 //            delete sries.sections[i].markers;
 //}
-async function save(event) {
-//    for (let i = 0; i < images.length; i++) {
-//        let image = images[i];
-//        if (image.anchored)
-//            series.sections[i].ouv = image.ouv;
-//        else
-//            delete series.sections[i].ouv;
-//    }
-////                let upload = await fetch("bucket.php?put=true&filename=" + args.get("filename")).then(response => response.json());
+async function save(){
+    if(filename.endsWith(".wwrp"))
+        dosave();
+    else
+        saveas();
+}
+async function saveas(){
+    const choice=await dppick({
+        bucket,
+        token,
+        title:"Save as...",
+        path:filename.substring(0,filename.lastIndexOf("/")+1),
+        extensions:[".wwrp"],
+        create:".wwrp",
+        createdefault:filename.slice(filename.lastIndexOf("/")+1,-5)+".wwrp",
+        createbutton:"Save"
+    });
+    if(choice.cancel)
+        return;
+    filename=choice.create || choice.pick;
+    dosave();
+}
+async function dosave(){
     for (let i = 0; i < sries.sections.length; i++)
         if (sections[i].markers.length)
             sries.sections[i].markers = sections[i].markers;
         else
             delete sries.sections[i].markers;
 
-    let upload = await fetch(`bucket.php?${argspack({filename: args.filename, put: true})}`).then(response => response.json());
+    const upload = await fetch(
+            `https://data-proxy.ebrains.eu/api/v1/buckets/${bucket}/${filename}`, {
+                method: "PUT",
+                headers: {
+                    authorization: `Bearer ${token}`
+                }
+            }
+    ).then(response => response.json());
     if (!upload.hasOwnProperty("url")) {
         alert("Can't save: " + JSON.stringify(upload));
         return;
@@ -795,7 +827,7 @@ async function save(event) {
     await fetch(upload.url, {
         method: "PUT",
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/x.webwarp'
         },
         body: JSON.stringify(sries)
     });

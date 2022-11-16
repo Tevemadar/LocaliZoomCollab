@@ -25,7 +25,7 @@
             #nltools{display: none;}
             #helpbutton{float: right;padding: 5px;}
             #help{display: none;width: 500px;background: #F0F0F0;position: absolute;padding: 10px;}
-            #metadata{display: block;position: absolute;text-align: center;}
+            #metadata{display: block;position: absolute;text-align: center; right:0;}
             
             #cover{
                 background: darkgray;
@@ -64,6 +64,7 @@
         <script src="propagation.js"></script>
         <script src="nonlin.js"></script>
         <script src="main.js"></script>
+        <script src="dppick.js"></script>
     </head>
     <body onload="startup()">
         <div id="status">
@@ -79,7 +80,7 @@
         <div id="helpbutton"><button onclick="toggleHelp()">?</button></div>
         <div id="tools">
             <button id="toggleAN" onclick="toggleAN()">Annotation tools</button>
-            <button id="toggleNL" onclick="toggleNL()">Settings</button>
+            <button onclick="save()" id="btn_save">Save</button><button onclick="saveas()" id="btn_saveas">Save As...</button><button id="toggleNL" onclick="toggleNL()">Settings</button>
             <div id="antools">
                 Marker color: <input type="color" id="ancolor" value="#000000" oninput="drawImage()" style="height: 18px">
                 <!--<button onclick="load()">Load</button><button onclick="save()" id="btn_save">Save</button>-->
@@ -87,7 +88,7 @@
             </div>
             <div id="nltools">
                 Marker color: <input type="color" id="nlcolor" value="#000000" oninput="drawImage()" style="height: 18px">
-                <button onclick="load()" disabled>Load</button><button onclick="save(event)" id="btn_save">Save</button>
+                <!--<button onclick="load()" disabled>Load</button>-->
                 <input type="checkbox" id="show_triangles" onchange="drawImage()">Show triangles
             </div>
 <!--            <div id="toolsinner">

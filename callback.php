@@ -39,43 +39,22 @@ $json["token"] = $token;
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="dppick.js"></script>
         <script>
             let state=<?php echo json_encode($json);?>;
             async function startup(){
-                let bucket=await fetch(
-                        `https://data-proxy.ebrains.eu/api/v1/buckets/${state["clb-collab-id"]}?delimiter=/`,{
-                            headers:{
-                                accept:"application/json",
-                                authorization:`Bearer ${state.token}`
-                            }
-                        }
-                    ).then(response=>response.json());
-                let tbody=document.getElementById("bucket-content");
-//                for(let item of bucket.objects)
-//                    if(item.content_type==="application/json")
-//                        tbody.innerHTML+="<tr><td><button onclick='clicky(event)'>"+item.name+"</button></td><td>"+item.bytes+"</td><td>"+item.last_modified+"</td></tr>";
-                for(let item of bucket.objects)
-                    if(!item.hasOwnProperty("subdir") && item.name.endsWith(".waln"))
-                        tbody.innerHTML+="<tr><td><button onclick='clicky(event)'>"+item.name+"</button></td><td>"+item.bytes+"</td><td>"+item.last_modified+"</td></tr>";
-                for(let item of bucket.objects)
-                    if(!item.hasOwnProperty("subdir") && item.name.endsWith(".wwrp"))
-                        tbody.innerHTML+="<tr><td><button onclick='clicky(event)'>"+item.name+"</button></td><td>"+item.bytes+"</td><td>"+item.last_modified+"</td></tr>";
-//                for(let item of bucket.objects)
-//                    if(!item.hasOwnProperty("subdir") && item.name.endsWith(".json"))
-//                        tbody.innerHTML+="<tr><td><button onclick='clicky(event)'>"+item.name+"</button></td><td>"+item.bytes+"</td><td>"+item.last_modified+"</td></tr>";
-            }
-            function clicky(event){
-                state.filename=event.target.innerText;
+                const choice=await dppick({
+                    bucket:state["clb-collab-id"],
+                    token:state.token,
+                    title:"Select WebWarp descriptor",
+                    extensions:[".waln","wwrp"],
+                    nocancel:true
+                });
+                state.filename=choice.pick;
                 location.href="filmstripzoom.html?"+encodeURIComponent(JSON.stringify(state));
             }
         </script>
     </head>
     <body onload="startup()">
-        <table>
-            <thead>
-                <tr><th>Filename</th><th>Size</th><th>Modified</th></tr>
-            </thead>
-            <tbody id="bucket-content"></tbody>
-        </table>
     </body>
 </html>
