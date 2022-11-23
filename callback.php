@@ -1,13 +1,27 @@
 <?php
 ob_start();
+$json = json_decode(urldecode(filter_input(INPUT_GET, "state")), true);
 
-$token_params = http_build_query(array(
-    "grant_type" => "authorization_code",
-    "code" => filter_input(INPUT_GET, "code"),
-    "redirect_uri" => getenv("ebrains_redirect_lz"),
-    "client_id" => getenv("ebrains_id_lz"),
-    "client_secret" => getenv("ebrains_secret_lz")
+switch ($json["app"]) {
+    case "localizoom":
+        $token_params = http_build_query(array(
+            "grant_type" => "authorization_code",
+            "code" => filter_input(INPUT_GET, "code"),
+            "redirect_uri" => getenv("ebrains_redirect_lz"),
+            "client_id" => getenv("ebrains_id_lz"),
+            "client_secret" => getenv("ebrains_secret_lz")
         ));
+        break;
+    case "webwarp":
+        $token_params = http_build_query(array(
+            "grant_type" => "authorization_code",
+            "code" => filter_input(INPUT_GET, "code"),
+            "redirect_uri" => getenv("ebrains_redirect_ww"),
+            "client_id" => getenv("ebrains_id_ww"),
+            "client_secret" => getenv("ebrains_secret_ww")
+        ));
+        break;
+}
 $token_ch = curl_init(getenv("ebrains_token"));
 curl_setopt_array($token_ch, array(
     CURLOPT_RETURNTRANSFER => true,
@@ -19,19 +33,7 @@ curl_close($token_ch);
 $token_obj = json_decode($token_res, true);
 $token = $token_obj["access_token"];
 
-$json = json_decode(urldecode(filter_input(INPUT_GET, "state")), true);
 $json["token"] = $token;
-
-//$ch = curl_init(getenv("ebrains_bucket") . $json["clb-collab-id"] . "?delimiter=/");
-//curl_setopt_array($ch, array(
-//    CURLOPT_RETURNTRANSFER => true,
-//    CURLOPT_HTTPHEADER => array(
-//        "Accept: application/json",
-//        "Authorization: Bearer " . $token
-//    )
-//));
-//$files = curl_exec($ch);
-//curl_close($ch);
 ?>
 <!DOCTYPE html>
 <html>
@@ -46,7 +48,7 @@ $json["token"] = $token;
                 const choice=await dppick({
                     bucket:state["clb-collab-id"],
                     token:state.token,
-                    title:"Select WebWarp descriptor",
+                    title:`Select a ${{"localizoom":"LocaliZoom","webwarp":"WebWarp"}[state.app]} descriptor`,
                     extensions:[".waln","wwrp"],
                     nocancel:true
                 });
