@@ -43,7 +43,6 @@ async function startup() {
     popup("Loading data");
     sries = await getDescriptor();
 
-
     atlas = new Promise(resolve => new Worker("getlas.js?" + sries.atlas)
                 .onmessage = event => {
                     if (event.data.hasOwnProperty("blob"))
@@ -55,6 +54,7 @@ async function startup() {
     sections = JSON.parse(JSON.stringify(sries.sections));
     for (let section of sections) {
         let filename = section.filename;
+        section.name = filename.substring(0, filename.lastIndexOf("."));
         section.snr = parseInt(filename.match(/(?<=_s)\d+/));
         section.anchored = section.hasOwnProperty("ouv");
         let w = section.width, h = section.height, maxlevel = 0;
@@ -64,7 +64,7 @@ async function startup() {
             maxlevel++;
         }
         section.maxlevel = maxlevel;
-        section.base = `${filename}/${filename.substring(0, filename.lastIndexOf("."))}_files/`;
+        section.base = `${filename}/${section.name}_files/`;
         if (!section.hasOwnProperty("markers"))
             section.markers = [];
         if (!section.hasOwnProperty("poi"))
@@ -869,4 +869,99 @@ function cover() {
     let popup = document.getElementById("popup");
     cover.hidden = popup.hidden = true;
     cover.style.display = popup.style.display = "none";
+}
+
+async function exprt() {
+    let date = new Date();
+    let te = new TextEncoder();
+
+    let ziplist = [];
+
+    let descriptor = {
+        target: sries.atlas,
+        slices: sections.map(section => ({filename: section.filename, width: section.width, height: section.height, anchoring: section.ouv}))
+    };
+    ziplist.push({
+        name: "anchorings.json",
+        date,
+        data: te.encode(JSON.stringify(descriptor, null, 1))
+    });
+
+    for (let i = 0; i < sections.length; i++) {
+        let section = sections[i];
+        popup(`${i + 1}/${sections.length} ${section.filename}`);
+
+        let slice = dataslice(section.ouv);
+
+        slice.aid = sries.atlas;
+        ziplist.push({
+            name: section.name + ".seg",
+            date,
+            data: segrle(slice)
+        });
+
+        let canvas = document.createElement("canvas");
+        canvas.width = slice.width;
+        canvas.height = slice.height;
+        let ctx = canvas.getContext("2d");
+        let idata = ctx.createImageData(slice.width, slice.height);
+        let data = idata.data;
+        for (let pos = 0; pos < slice.data.length; pos++) {
+            let v = slice.data[pos];
+            if (v !== 0) {
+                let l = atlas.labels[v];
+                data[pos * 4] = l.r;
+                data[pos * 4 + 1] = l.g;
+                data[pos * 4 + 2] = l.b;
+                data[pos * 4 + 3] = 255;
+            }
+        }
+        ctx.putImageData(idata, 0, 0);
+        ziplist.push({
+            name: section.name + ".png",
+            date,
+            data: new Uint8Array(await new Promise(resolve => canvas.toBlob(blob => resolve(blob.arrayBuffer()))))
+        });
+    }
+
+    let zipfile = zipstore(ziplist);
+
+    const choice = await dppick({
+        bucket,
+        token,
+        title: "Export overlays...",
+        path: filename.substring(0, filename.lastIndexOf("/") + 1),
+        extensions: [".zip"],
+        create: ".zip",
+        createdefault: filename.slice(filename.lastIndexOf("/") + 1, -5) + ".zip",
+        createbutton: "Export"
+    });
+    if (choice.cancel) {
+        cover();
+        return;
+    }
+    let zipname = choice.create || choice.pick;
+
+    popup("Uploading overlays");
+    let upload = await fetch(
+            `https://data-proxy.ebrains.eu/api/v1/buckets/${bucket}/${zipname}`, {
+                method: "PUT",
+                headers: {
+                    accept: "application/json",
+                    authorization: `Bearer ${token}`
+                }
+            }
+    ).then(response => response.json());
+    if (!upload.hasOwnProperty("url")) {
+        alert("Can't save: " + JSON.stringify(upload));
+        return;
+    }
+    await fetch(upload.url, {
+        method: "PUT",
+        headers: {
+            'Content-Type': 'application/zip'
+        },
+        body: zipfile
+    });
+    cover();
 }
