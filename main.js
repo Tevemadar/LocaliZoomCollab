@@ -1,8 +1,12 @@
 const args = JSON.parse(decodeURIComponent(location.search.substring(1)));
 const bucket = args["clb-collab-id"];
 const token = args.token;
+const app = args.app;
+const app_ww = "webwarp";
+const app_lz = "localizoom";
+const appext= {[app_ww]:".wwrp",[app_lz]:".lz"}[app];
 let filename = args.filename;
-args.tools = args.nl = true;
+//args.tools = args.nl = true;
 
 async function dpurlget(bucketfile){
     return fetch(
@@ -76,25 +80,30 @@ async function startup() {
     cover();
     propagate(sections, atlas);
 
-    if (args.view) {
-        fs_setalpha(0);
-    }
-    args.view = !args.tools;
-    args.prev = true;
-    if (args.view) {
-        document.getElementById("tools").style.display = "none";
-    } else {
+//    if (args.view) {
+//        fs_setalpha(0);
+//    }
+//    args.view = !args.tools;
+//    args.prev = true;
+//    if (args.view) {
+//        document.getElementById("tools").style.display = "none";
+//    } else {
         document.getElementById("tools").style.top = document.getElementById("status").offsetHeight + "px";
-        if (args.nl) {
+        switch(app) {
+            case app_ww:
             document.getElementById("toggleNL").style.display = "inline";
-        } else {
+                break;
+            case app_lz:
             document.getElementById("toggleAN").style.display = "inline";
+                break;
+            default:
+                throw app+"?";
         }
-    }
-    if (args.opacity) {
-        document.getElementById("alpha").value = args.opacity;
-        //document.getElementById("outline").value="#FFFFFF";
-    }
+//    }
+//    if (args.opacity) {
+//        document.getElementById("alpha").value = args.opacity;
+//        //document.getElementById("outline").value="#FFFFFF";
+//    }
 
 //                var xhr=new XMLHttpRequest();
 //                xhr.open("GET",locators.AtlasLocator(args.atlas));
@@ -150,11 +159,12 @@ var zoomer;
 var cfg;
 
 let current_section;
-let markers;//,poi;
+let markers,poi;
 let ouv;
 function dispatchSection(section) {
     current_section = section;
     markers = current_section.markers;
+    poi = current_section.poi;
     ouv = section.ouv;
     var data = dataslice(section.ouv);
     var w = overlay.width = overlaywidth = data.width;
@@ -260,8 +270,9 @@ function dispatchSection(section) {
         ctx.globalAlpha = 1;
 
         if (show_triangles.checked) {
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 2.5;
+            for(const style of [["#000000",2.5],["#FFFFFF",0.75]]){
+            ctx.strokeStyle = style[0];// "#000000";
+            ctx.lineWidth = style[1];// 2.5;
             ctx.beginPath();
             triangles.forEach(function (triangle) {
                 var v = vertices[triangle[2]];
@@ -278,9 +289,10 @@ function dispatchSection(section) {
                 }
             });
             ctx.stroke();
+            }
         }
-        if (!args.view) {
-            if (args.nl) {
+        switch(app) {
+            case app_ww:
                 ctx.strokeStyle = "#FFFF80";
                 try {
                     ctx.strokeStyle = document.getElementById("nlcolor").value;
@@ -300,7 +312,8 @@ function dispatchSection(section) {
                     ctx.lineTo(sx + 10, sy);
                 }
                 ctx.stroke();
-            } else {
+                break;
+            case app_lz:
                 ctx.strokeStyle = "#FFFF80";
                 try {
                     ctx.strokeStyle = document.getElementById("ancolor").value;
@@ -317,8 +330,10 @@ function dispatchSection(section) {
                     ctx.lineTo(sx + 10, sy);
                 }
                 ctx.stroke();
+                break;
+            default:
+                throw app+"?";
             }
-        }
         if ((pop !== null) && (alpha !== 0)) {
             ctx.fillStyle = "rgb(" + pop.r + "," + pop.g + "," + pop.b + ")";
             if (popscape)
@@ -345,13 +360,18 @@ function dispatchSection(section) {
         var mx = cursor.imagex = Math.round(x + event.offsetX * w / cw);
         var my = cursor.imagey = Math.round(y + event.offsetY * h / ch);
         if (markerpick !== undefined) {
-            if (args.nl) {
+            switch(app) {
+                case app_ww:
                 markers[markerpick].nx = mx;
                 markers[markerpick].ny = my;
                 triangulate();
-            } else {
+                break;
+            case app_lz:
                 poi[markerpick].x = mx;
                 poi[markerpick].y = my;
+                break;
+            default:
+                throw app+"?";
             }
             drawImage();
             return;
@@ -388,23 +408,28 @@ function dispatchSection(section) {
     };
     var markerpick;
     cfg.MouseDown = function (event, cw, ch, x, y, w, h) {
-        if (args.view)
-            return false;
+//        if (args.view)
+//            return false;
         markerpick = undefined;
-        if (args.nl) {
+        switch(app) {
+            case app_ww:
             for (var i = 0; i < markers.length; i++) {
                 var sx = Math.round((markers[i].nx - x) * cw / w) + 0.5;
                 var sy = Math.round((markers[i].ny - y) * ch / h) + 0.5;
                 if (event.offsetX > sx - 10 && event.offsetX < sx + 10 && event.offsetY > sy - 10 && event.offsetY < sy + 10)
                     markerpick = i;
             }
-        } else {
+            break;
+        case app_lz:
             for (var i = 0; i < poi.length; i++) {
                 var sx = Math.round((poi[i].x - x) * cw / w) + 0.5;
                 var sy = Math.round((poi[i].y - y) * ch / h) + 0.5;
                 if (event.offsetX > sx - 10 && event.offsetX < sx + 10 && event.offsetY > sy - 10 && event.offsetY < sy + 10)
                     markerpick = i;
             }
+                break;
+            default:
+                throw app+"?";
         }
         return markerpick !== undefined;
     };
@@ -434,8 +459,10 @@ function dispatchSection(section) {
                 }
                 break;
             case "Delete":
-                if (!args.view) {
-                    if (args.nl) {
+//                if (!args.view) {
+                    switch(app) {
+                        case app_ww:
+                    {
                         var idx = undefined;
                         for (var i = 0; i < markers.length; i++) {
                             var sx = Math.round((markers[i].x - x) * cw / w) + 0.5;
@@ -452,7 +479,9 @@ function dispatchSection(section) {
                             triangulate();
                             drawImage();
                         }
-                    } else {
+                    }
+                    break;
+                case app_lz:{
                         var idx = undefined;
                         for (var i = 0; i < poi.length; i++) {
                             var sx = Math.round((poi[i].x - x) * cw / w) + 0.5;
@@ -465,11 +494,17 @@ function dispatchSection(section) {
                             drawImage();
                         }
                     }
+                break;
+            default:
+                throw app+"?";
+                    
                 }
                 break;
             default:
-                if (!args.view && cursor.imagex >= 0 && cursor.imagey >= 0 && cursor.imagex <= cfg.Width && cursor.imagey <= cfg.Height) {
-                    if (args.nl) {
+                if (/*!args.view &&*/ cursor.imagex >= 0 && cursor.imagey >= 0 && cursor.imagex <= cfg.Width && cursor.imagey <= cfg.Height)
+                    switch(app) {
+                        case app_ww:
+                    {
                         var D = [cursor.imagex, cursor.imagey];
                         for (var triangle of triangles) {
                             var ai = triangle[0];
@@ -510,12 +545,15 @@ function dispatchSection(section) {
                         }
                         triangulate();
                         drawImage();
-                    } else {
+                    } break;
+                case app_lz:
                         poi.push({x: cursor.imagex, y: cursor.imagey});
                         drawImage();
-                    }
+                break;
+            default:
+                throw app+"?";
                 }
-        }
+            }
     };
     if (zoomer)
         zoomer.detach();
@@ -784,7 +822,7 @@ function load() {
 //            delete sries.sections[i].markers;
 //}
 async function save(){
-    if(filename.endsWith(".wwrp"))
+    if(filename.endsWith(appext))
         dosave();
     else
         saveas();
@@ -795,9 +833,9 @@ async function saveas(){
         token,
         title:"Save as...",
         path:filename.substring(0,filename.lastIndexOf("/")+1),
-        extensions:[".wwrp"],
-        create:".wwrp",
-        createdefault:filename.slice(filename.lastIndexOf("/")+1,-5)+".wwrp",
+        extensions:[appext],
+        create:appext,
+        createdefault:filename.slice(filename.lastIndexOf("/")+1,-5)+appext,
         createbutton:"Save"
     });
     if(choice.cancel)
@@ -806,11 +844,22 @@ async function saveas(){
     dosave();
 }
 async function dosave(){
-    for (let i = 0; i < sries.sections.length; i++)
-        if (sections[i].markers.length)
-            sries.sections[i].markers = sections[i].markers;
-        else
-            delete sries.sections[i].markers;
+    switch(app) {
+        case app_ww:
+            for (let i = 0; i < sries.sections.length; i++)
+                if (sections[i].markers.length)
+                    sries.sections[i].markers = sections[i].markers;
+                else
+                    delete sries.sections[i].markers;
+                break;
+            case app_lz:
+            for (let i = 0; i < sries.sections.length; i++)
+                if (sections[i].poi.length)
+                    sries.sections[i].poi = sections[i].poi;
+                else
+                    delete sries.sections[i].poi;
+                break;
+    }
 
     const upload = await fetch(
             `https://data-proxy.ebrains.eu/api/v1/buckets/${bucket}/${filename}`, {
@@ -827,7 +876,7 @@ async function dosave(){
     await fetch(upload.url, {
         method: "PUT",
         headers: {
-            'Content-Type': 'application/x.webwarp'
+            "Content-Type": "application/x." + app
         },
         body: JSON.stringify(sries)
     });

@@ -48,8 +48,8 @@ $json["token"] = $token;
                 const choice=await dppick({
                     bucket:state["clb-collab-id"],
                     token:state.token,
-                    title:`Select a ${{"localizoom":"LocaliZoom","webwarp":"WebWarp"}[state.app]} descriptor`,
-                    extensions:[".waln","wwrp"],
+                    title:`Select a ${{localizoom:"LocaliZoom",webwarp:"WebWarp"}[state.app]} descriptor`,
+                    extensions:{webwarp:[".waln","wwrp"],localizoom:[".waln","wwrp","lz"]}[state.app],
                     nocancel:true
                 });
                 state.filename=choice.pick;
