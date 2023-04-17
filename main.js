@@ -94,6 +94,7 @@ async function startup() {
             document.getElementById("toggleNL").style.display = "inline";
                 break;
             case app_lz:
+            document.getElementById("btn_exprt").style.display="none";
             document.getElementById("toggleAN").style.display = "inline";
                 break;
             default:
