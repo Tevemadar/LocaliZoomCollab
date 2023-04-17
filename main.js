@@ -836,7 +836,7 @@ async function saveas(){
         path:filename.substring(0,filename.lastIndexOf("/")+1),
         extensions:[appext],
         create:appext,
-        createdefault:filename.slice(filename.lastIndexOf("/")+1,-5)+appext,
+        createdefault:filename.slice(filename.lastIndexOf("/")+1,filename.lastIndexOf("."))+appext,
         createbutton:"Save"
     });
     if(choice.cancel)
@@ -983,7 +983,7 @@ async function exprt() {
         path: filename.substring(0, filename.lastIndexOf("/") + 1),
         extensions: [".zip"],
         create: ".zip",
-        createdefault: filename.slice(filename.lastIndexOf("/") + 1, -5) + ".zip",
+        createdefault: filename.slice(filename.lastIndexOf("/") + 1, filename.lastIndexOf(".")) + ".zip",
         createbutton: "Export"
     });
     if (choice.cancel) {
