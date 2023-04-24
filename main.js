@@ -573,13 +573,14 @@ function excel() {
     d.write("function swapdots(){var e=document.getElementById('ta');e.innerHTML=e.innerHTML.replace(/\\./g,',');}");
     d.write("function swapcommas(){var e=document.getElementById('ta');e.innerHTML=e.innerHTML.replace(/,/g,'.');}");
     d.write("<\/script></head><body><textarea id='ta'>");
-    var s = "ID\t" + ouv.id + "\t\t\tHIDE\tHIDE\n";
+    var fn = current_section.filename;
+    var s = "ID\t" + fn.substring(0, fn.lastIndexOf(".")) + "\t\t\tHIDE\tHIDE\n";
     s += "Resolution\t" + cfg.Width + "\t" + cfg.Height + "\n";
     s += "\n";
     s += "Anchor\tx\ty\tz\n";
-    s += "o\t" + ouv.ox + "\t" + ouv.oy + "\t" + ouv.oz + "\n";
-    s += "u\t" + ouv.ux + "\t" + ouv.uy + "\t" + ouv.uz + "\n";
-    s += "v\t" + ouv.vx + "\t" + ouv.vy + "\t" + ouv.vz + "\n";
+    s += "o\t" + ouv[0] + "\t" + ouv[1] + "\t" + ouv[2] + "\n";
+    s += "u\t" + ouv[3] + "\t" + ouv[4] + "\t" + ouv[5] + "\n";
+    s += "v\t" + ouv[6] + "\t" + ouv[7] + "\t" + ouv[8] + "\n";
     s += "\n";
     if (atlas.transformations.length === 1) {
         s += "Marker#\tx\ty\t\tnx\tny\tfx\tfy\tfz\n";
