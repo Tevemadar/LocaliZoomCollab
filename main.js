@@ -76,6 +76,8 @@ async function getTile(section, level, x, y) {
 }
 
 async function startup() {
+    if(args.embedded)
+        document.getElementById("btn_saveas").style.display="none";
     window.addEventListener("resize", fullscreen);
     fullscreen();
 
@@ -865,7 +867,7 @@ function load() {
 //            delete sries.sections[i].markers;
 //}
 async function save(){
-    if(filename.endsWith(appext))
+    if(args.embedded || filename.endsWith(appext))
         dosave();
     else
         saveas();
