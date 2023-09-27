@@ -114,6 +114,9 @@ async function startup() {
         section.maxlevel = maxlevel;
         if (!section.hasOwnProperty("markers"))
             section.markers = [];
+        else
+            section.markers = section.markers.map(m =>
+                Array.isArray(m) ? {x: m[0], y: m[1], nx: m[2], ny: m[3]} : m);
         if (!section.hasOwnProperty("poi"))
             section.poi = [];
     }
@@ -893,7 +896,8 @@ async function dosave(){
         case app_ww:
             for (let i = 0; i < sries.sections.length; i++)
                 if (sections[i].markers.length)
-                    sries.sections[i].markers = sections[i].markers;
+                    // sries.sections[i].markers = sections[i].markers;
+                    sries.sections[i].markers = sections[i].markers.map(m => [m.x, m.y, m.nx, m.ny]);
                 else
                     delete sries.sections[i].markers;
                 break;
