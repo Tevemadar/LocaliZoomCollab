@@ -87,8 +87,8 @@ function fs_redraw() {
 //                fs_redraw();
 //            };
 //            img.src = locators.TileLocator(item.id, maxlevel - level, 0, 0, doc.getAttribute("Format"));
-            getTile(item,item.maxlevel-level,0,0).then(tile=>{
-                item.icon=tile;
+            getTile(item, item.maxlevel - level, 0, 0).then(tile => {
+                item.icon = tile;
                 fs_redraw();
             })
             item.icon = true;

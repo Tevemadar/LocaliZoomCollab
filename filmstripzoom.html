@@ -5,28 +5,84 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width">
         <style>
-            body{margin: 0;padding: 0; overflow:hidden;}
-            canvas{display: block;cursor: crosshair;outline: none;}
-            canvas#scroller{cursor: pointer;}
-            div{display: inline-block;}
-            #traf{width: 130px;}
-            #status{padding: 5px;background: #F0F0F0;width: 900px;/*height: 20px;*/}
-            #coords{float: right;padding-right: 5px;}
-            #outline{float:right;height: 18px;}
-            #outlinedesc{float:right;padding-right: 5px;}
-            #alpha{float:right;height: 15px;width: 100px;}
-            #alphadesc{float:right;padding-right: 5px;}
-/*            #bright{float:right;height: 15px;width: 100px;}
-            #brightdesc{float:right;padding-right: 5px;}*/
-            #tools{background: #F0F0F0;height: 20px;padding: 5px;position: absolute;left:0;}
+            body{
+                margin: 0;
+                padding: 0;
+                overflow:hidden;
+            }
+            canvas{
+                display: block;
+                cursor: crosshair;
+                outline: none;
+            }
+            canvas#scroller{
+                cursor: pointer;
+            }
+            div{
+                display: inline-block;
+            }
+            #traf{
+                width: 130px;
+            }
+            #status{
+                padding: 5px;
+                background: #F0F0F0;
+                width: 900px;/*height: 20px;*/
+            }
+            #coords{
+                float: right;
+                padding-right: 5px;
+            }
+            #outline{
+                float:right;
+                height: 18px;
+            }
+            #outlinedesc{
+                float:right;
+                padding-right: 5px;
+            }
+            #alpha{
+                float:right;
+                height: 15px;
+                width: 100px;
+            }
+            #alphadesc{
+                float:right;
+                padding-right: 5px;
+            }
+            /*            #bright{float:right;height: 15px;width: 100px;}
+                        #brightdesc{float:right;padding-right: 5px;}*/
+            #tools{
+                background: #F0F0F0;
+                height: 20px;
+                padding: 5px;
+                position: absolute;
+                left:0;
+            }
             /*#toolsinner{display: none;}*/
             #toggleAN,#toggleNL,
             #antools,
-            #nltools{display: none;}
-            #helpbutton{float: right;padding: 5px;}
-            #help{display: none;width: 500px;background: #F0F0F0;position: absolute;padding: 10px;}
-            #metadata{display: block;position: absolute;text-align: center; right:0;}
-            
+            #nltools{
+                display: none;
+            }
+            #helpbutton{
+                float: right;
+                padding: 5px;
+            }
+            #help{
+                display: none;
+                width: 500px;
+                background: #F0F0F0;
+                position: absolute;
+                padding: 10px;
+            }
+            #metadata{
+                display: block;
+                position: absolute;
+                text-align: center;
+                right:0;
+            }
+
             #cover{
                 background: darkgray;
                 opacity: 0.5;
@@ -74,8 +130,8 @@
     <body onload="startup()">
         <div id="status">
             <select id="traf"></select>
-<!--            <input type="range" id="bright" min="1" max="20" step="0.2" value="1" onchange="drawImage()">
-            <div id="brightdesc">Brighten image:</div>-->
+            <!--            <input type="range" id="bright" min="1" max="20" step="0.2" value="1" onchange="drawImage()">
+                        <div id="brightdesc">Brighten image:</div>-->
             <input type="color" value="#0000FF" id="outline" oninput="handleOvly(event)">
             <div id="outlinedesc">Outline:</div>
             <input type="range" id="alpha" min="0" max="100" step="10" value="100" oninput="handleOvly(event)">
@@ -100,12 +156,12 @@
                 <!--<button onclick="load()" disabled>Load</button>-->
                 <input type="checkbox" id="show_triangles" onchange="drawImage()">Show triangles
             </div>
-<!--            <div id="toolsinner">
-                Marker color: <input type="color" id="crosscolor" value="#000000" onchange="drawImage()" style="height: 18px">
-                <button onclick="load()">Load</button><button onclick="save()" id="btn_save">Save</button>
-                Export to <button onclick="excel()">Excel</button> (this slice) or <button onclick="meshview()">MeshView</button> (all slices).
-                <input type="checkbox" id="show_triangles" onchange="drawImage()">Show triangles
-            </div>-->
+            <!--            <div id="toolsinner">
+                            Marker color: <input type="color" id="crosscolor" value="#000000" onchange="drawImage()" style="height: 18px">
+                            <button onclick="load()">Load</button><button onclick="save()" id="btn_save">Save</button>
+                            Export to <button onclick="excel()">Excel</button> (this slice) or <button onclick="meshview()">MeshView</button> (all slices).
+                            <input type="checkbox" id="show_triangles" onchange="drawImage()">Show triangles
+                        </div>-->
         </div>
         <canvas id="zoomcanvas" tabindex="1" onmouseover="event.target.focus()"></canvas>
         <canvas id="scroller" onclick="fs_mclick(event)" onwheel="fs_mwheel(event)"></canvas>
@@ -120,9 +176,9 @@
                 <li>Pan and zoom with mouse drag and mouse scroll wheel</li>
                 <li>Step backwards and forwards in series with left and right arrow keys<sup><sub>*</sub></sup></li>
                 <li>Quick set segmentation transparency to minimum and back using down and up arrow keys<sup><sub>*</sub></sup></li>
-<!--                <li>Press Space<sup><sub>*</sub></sup> to annotate points of interest. Atlas coordinates for points of interest can be exported to Excel or MeshView atlas viewer (requires Adobe Flash)</li>
-                <li>Press Delete<sup><sub>*</sub></sup> to remove an annotation marker under the mouse cursor</li>
-                <li>Drag an annotation marker to refine its position</li>-->
+                <!--                <li>Press Space<sup><sub>*</sub></sup> to annotate points of interest. Atlas coordinates for points of interest can be exported to Excel or MeshView atlas viewer (requires Adobe Flash)</li>
+                                <li>Press Delete<sup><sub>*</sub></sup> to remove an annotation marker under the mouse cursor</li>
+                                <li>Drag an annotation marker to refine its position</li>-->
             </ul>
             <a href="https://localizoom.readthedocs.io/" target="_blank">Documentation</a><br>
             <br>
