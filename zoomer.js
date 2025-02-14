@@ -13,7 +13,7 @@ class ZoomView {
         this.#view = null;
     }
     static keyfunc = (l, x, y) => `${l}-${x}-${y}`;
-    async function prepare(view) {
+    async prepare(view) {
         this.redraw = drawImage;
         let {cutx, cuty, cutw, cuth} = view;
         const curr = this.#view = {cutx, cuty, cutw, cuth};
