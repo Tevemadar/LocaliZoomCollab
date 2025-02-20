@@ -135,7 +135,7 @@ async function startup() {
 //    if (args.view) {
 //        document.getElementById("tools").style.display = "none";
 //    } else {
-    document.getElementById("tools").style.top = document.getElementById("status").offsetHeight + "px";
+//??    document.getElementById("tools").style.top = document.getElementById("status").offsetHeight + "px";
     switch (app) {
         case app_ww:
             document.getElementById("toggleNL").style.display = "inline";
@@ -183,16 +183,10 @@ async function startup() {
 
 function fullscreen() {
     var zc = document.getElementById("zoomcanvas");
-    var sc = document.getElementById("scroller");
-//    sc.addEventListener("wheel", fs_mwheel, true);
-
-    var help = document.getElementById("help");
-    document.getElementById("metadata").style.top = help.style.top = zc.offsetTop + "px";
-    help.style.left = window.innerWidth - 520 + "px";
-
-    fs_setwidth(zc.width = sc.width = canvaswidth = window.innerWidth);
-    fs_setheight(sc.height = 128 + 20);
-    zc.height = canvasheight = window.innerHeight - zc.offsetTop - 128 - 20;
+    var main = document.getElementById("main");
+    zc.width = main.offsetWidth;
+    zc.height = main.offsetHeight;
+    fs_resize();
     if (zoomer)
         zoomer.home();
 }
