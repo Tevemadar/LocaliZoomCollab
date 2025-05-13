@@ -71,7 +71,8 @@ async function getTile(section, level, x, y) {
     return new Promise(resolve => {
         const tile = document.createElement("img");
         tile.onload = () => resolve(tile);
-        tile.src = `https://object.cscs.ch/v1/AUTH_08c08f9f119744cbbf77e216988da3eb/${sries.oldisv}/${section.base}${level}/${x}_${y}.${section.format}`;
+        //tile.src = `https://object.cscs.ch/v1/AUTH_08c08f9f119744cbbf77e216988da3eb/${sries.oldisv}/${section.base}${level}/${x}_${y}.${section.format}`;
+        tile.src = `https://data-proxy.ebrains.eu/api/v1/buckets/p08c08-${sries.oldisv}/${section.base}${level}/${x}_${y}.${section.format}`;
     });
 }
 
