@@ -552,6 +552,18 @@ function dispatchSection(section) {
                     switch (app) {
                         case app_ww:
                             {
+                                // todo
+                                for(const marker of markers){
+                                    const sx = Math.round((marker.nx - x) * cw / w) + 0.5;
+                                    const sy = Math.round((marker.ny - y) * ch / h) + 0.5;
+                                    if (cursor.screenx > sx - 8 && cursor.screenx < sx + 8 && cursor.screeny > sy - 8 && cursor.screeny < sy + 8){
+                                        event.target.style="cursor:not-allowed";
+                                        const tmp=()=>{event.target.style="cursor:cross";event.target.removeEventListener("keyup",tmp);};
+                                        event.target.addEventListener("keyup",tmp);
+                                        return;
+                                    }
+                                }
+                                
                                 var D = [cursor.imagex, cursor.imagey];
                                 for (var triangle of triangles) {
                                     var ai = triangle[0];
@@ -572,7 +584,7 @@ function dispatchSection(section) {
                                         else
                                             B = {x: vertices[bi][0], y: vertices[bi][1]};
                                         if (ci >= 4)
-                                            C = markers[triangle[2] - 4];
+                                            C = markers[ci - 4];
                                         else
                                             C = {x: vertices[ci][0], y: vertices[ci][1]};
                                         markers.push({
@@ -589,6 +601,12 @@ function dispatchSection(section) {
                                 if (D) {
                                     //                                    console.log("!");
                                     markers.push({x: cursor.imagex, y: cursor.imagey, nx: cursor.imagex, ny: cursor.imagey});
+                                }
+                                const bughunt=JSON.stringify(markers[markers.length-1]);
+                                if(bughunt.includes("null")){
+                                    console.log(JSON.stringify({cw, ch, x, y, w, h, D, cursor, markers}));
+                                    alert("You found our favourite bug! The developer console -F12 is the usual shortcut to open it- contains a possibly very long message with lots of numbers, could you save that one for us? Right-clicking on the text should bring up various copy options, any of them will suffice.");
+                                    markers.pop();
                                 }
                                 triangulate();
                                 drawImage();
