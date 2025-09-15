@@ -911,12 +911,17 @@ async function saveas() {
 async function dosave() {
     switch (app) {
         case app_ww:
-            for (let i = 0; i < sries.sections.length; i++)
+            for (let i = 0; i < sries.sections.length; i++){
                 if (sections[i].markers.length)
                     // sries.sections[i].markers = sections[i].markers;
                     sries.sections[i].markers = sections[i].markers.map(m => [m.x, m.y, m.nx, m.ny]);
                 else
                     delete sries.sections[i].markers;
+                if(sections[i].wwdone)
+                    sries.sections[i].wwdone = true;
+                else
+                    delete sries.sections[i].wwdone;
+            }
             break;
         case app_lz:
             for (let i = 0; i < sries.sections.length; i++)
