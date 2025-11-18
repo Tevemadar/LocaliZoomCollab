@@ -77,8 +77,10 @@ async function getTile(section, level, x, y) {
 }
 
 async function startup() {
-    if (args.embedded)
+    if (args.embedded) {
         document.getElementById("btn_saveas").style.display = "none";
+        document.getElementById("btn_exprt").style.display = "none";
+    }
     window.addEventListener("resize", fullscreen);
     fullscreen();
 
