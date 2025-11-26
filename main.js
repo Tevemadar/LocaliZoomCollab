@@ -1,4 +1,5 @@
 const args = JSON.parse(decodeURIComponent(location.search.substring(1)));
+//args.embedded = true;
 const bucket = args["clb-collab-id"];
 const token = args.token;
 const app = args.app;
@@ -78,8 +79,9 @@ async function getTile(section, level, x, y) {
 
 async function startup() {
     if (args.embedded) {
-        document.getElementById("btn_saveas").style.display = "none";
-        document.getElementById("btn_exprt").style.display = "none";
+        document.getElementById("bucket_tools").style.display = "none";
+//        document.getElementById("btn_saveas").style.display = "none";
+//        document.getElementById("btn_exprt").style.display = "none";
     }
     window.addEventListener("resize", fullscreen);
     fullscreen();
@@ -496,12 +498,14 @@ function dispatchSection(section) {
                 fs_next();
                 break;
             case "ArrowUp":
+                event.preventDefault();
                 if (prevalpha) {
                     alpha.value = prevalpha;
                     drawImage();
                 }
                 break;
             case "ArrowDown":
+                event.preventDefault();
                 if (alpha.value !== "0") {
                     prevalpha = alpha.value;
                     alpha.value = 0;

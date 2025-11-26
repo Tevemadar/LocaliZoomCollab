@@ -41,6 +41,7 @@ function fs_redraw() {
         if(app===app_ww) {
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
+            checkbox.disabled = true;
             checkbox.className = "icbx";
             checkbox.onclick = fs_done;
             if(item.wwdone){
@@ -72,16 +73,21 @@ function fs_done(event) {
         target.classList.remove("done");
         delete fs_data.iconmap.get(target).wwdone;
     }
+    if(args.embedded)
+        dosave();
 }
 
 function fs_activate(event, scroll) {
     const target = event.target.parentElement;
     if (fs_data.active === target)
         return;
-    if (fs_data.active)
+    if (fs_data.active) {
         fs_data.active.classList.remove("active");
+        fs_data.active.getElementsByTagName("input")[0].disabled = true;
+    }
     fs_data.active = target;
     fs_data.active.classList.add("active");
+    fs_data.active.getElementsByTagName("input")[0].disabled = false;
     if (scroll)
         fs_data.active.scrollIntoView({block: "center"});
     dispatchSection(fs_data.iconmap.get(target));
