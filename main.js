@@ -1,11 +1,12 @@
 const args = JSON.parse(decodeURIComponent(location.search.substring(1)));
-//args.embedded = true;
+args.embedded = true;
 const bucket = args["clb-collab-id"];
 const token = args.token;
 const app = args.app;
 const app_ww = "webwarp";
 const app_lz = "localizoom";
 const appext = {[app_ww]: ".wwrp", [app_lz]: ".lz"}[app];
+const appdone = {[app_ww]: "wwdone", [app_lz]: "lzdone"}[app];
 let filename = args.filename;
 //args.tools = args.nl = true;
 
@@ -150,7 +151,7 @@ async function startup() {
             break;
         case app_lz:
 //            document.getElementById("btn_exprt").style.display="none";
-            document.getElementById("btn_excel").hidden = false;
+            document.getElementById("btn_excel").hidden = args.embedded;
             document.getElementById("toggleAN").style.display = "inline";
             break;
         default:
@@ -917,19 +918,19 @@ async function saveas() {
     dosave();
 }
 async function dosave() {
+    for (let i = 0; i < sries.sections.length; i++)
+        if(sections[i][appdone])
+            sries.sections[i][appdone] = true;
+        else
+            delete sries.sections[i][appdone];
     switch (app) {
         case app_ww:
-            for (let i = 0; i < sries.sections.length; i++){
+            for (let i = 0; i < sries.sections.length; i++)
                 if (sections[i].markers.length)
                     // sries.sections[i].markers = sections[i].markers;
                     sries.sections[i].markers = sections[i].markers.map(m => [m.x, m.y, m.nx, m.ny]);
                 else
                     delete sries.sections[i].markers;
-                if(sections[i].wwdone)
-                    sries.sections[i].wwdone = true;
-                else
-                    delete sries.sections[i].wwdone;
-            }
             break;
         case app_lz:
             for (let i = 0; i < sries.sections.length; i++)

@@ -38,21 +38,19 @@ function fs_redraw() {
         const h = icon.height = overlay.height = 128 * item.height / item.width;
         div.appendChild(icon);
         div.appendChild(overlay);
-        if(app===app_ww) {
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.disabled = true;
-            checkbox.className = "icbx";
-            checkbox.onclick = fs_done;
-            if(item.wwdone){
-                checkbox.checked=true;
-                div.classList.add("done");
-            }else{
-                checkbox.checked=false;
-                div.classList.add("notdone");
-            }
-            div.appendChild(checkbox);
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.disabled = true;
+        checkbox.className = "icbx";
+        checkbox.onclick = fs_done;
+        if(item[appdone]){
+            checkbox.checked=true;
+            div.classList.add("done");
+        }else{
+            checkbox.checked=false;
+            div.classList.add("notdone");
         }
+        div.appendChild(checkbox);
         scroller.appendChild(div);
         const ovly = slice(item.ouv);
         for (const cnv of [icon, overlay]) {
@@ -67,11 +65,11 @@ function fs_done(event) {
     if(event.target.checked){
         target.classList.add("done");
         target.classList.remove("notdone");
-        fs_data.iconmap.get(target).wwdone=true;
+        fs_data.iconmap.get(target)[appdone]=true;
     }else{
         target.classList.add("notdone");
         target.classList.remove("done");
-        delete fs_data.iconmap.get(target).wwdone;
+        delete fs_data.iconmap.get(target)[appdone];
     }
     if(args.embedded)
         dosave();
