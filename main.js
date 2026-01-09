@@ -1,5 +1,4 @@
 const args = JSON.parse(decodeURIComponent(location.search.substring(1)));
-args.embedded = true;
 const bucket = args["clb-collab-id"];
 const token = args.token;
 const app = args.app;
@@ -89,6 +88,30 @@ async function startup() {
 
     popup("Loading data");
     sries = await getDescriptor();
+    
+    if (!sries.hasOwnProperty("settings"))
+        sries.settings = {};
+    const settings = sries.settings;
+    if (settings.hasOwnProperty("overlay")) {
+        const overlay = settings.overlay;
+        const alpha = overlay.alpha;
+        document.getElementById("alpha").value = alpha;
+        const outline = document.getElementById("outline");
+        outline.value = overlay.color;
+        //outline.disabled = alpha !== 100;
+    } else
+        settings.overlay = {};
+//    if (settings.hasOwnProperty("filmstrip")) {
+//        const filmstrip = settings.filmstrip;
+//        const alpha = filmstrip.alpha;
+//        document.getElementById("fs_alpha").value = alpha;
+//        //const outline = document.getElementById("stripoutline");
+//        //outline.value = filmstrip.color;
+//        //outline.disabled = alpha !== 100;
+//    } else
+//        settings.filmstrip = {};
+    if (settings.hasOwnProperty("markercolor"))
+        document.getElementById("ancolor").value = document.getElementById("nlcolor").value = settings.markercolor;
 
     atlas = new Promise(resolve => new Worker("getlas.js?" + sries.atlas)
                 .onmessage = event => {
@@ -918,6 +941,14 @@ async function saveas() {
     dosave();
 }
 async function dosave() {
+    const settings = sries.settings;
+    const overlay = settings.overlay;
+    overlay.color = document.getElementById("outline").value;
+    overlay.alpha = document.getElementById("alpha").valueAsNumber;
+//    const filmstrip = settings.filmstrip;
+//    filmstrip.color = document.getElementById("outline").value; //!!
+//    filmstrip.alpha = document.getElementById("fs_alpha").valueAsNumber;
+    
     for (let i = 0; i < sries.sections.length; i++)
         if(sections[i][appdone])
             sries.sections[i][appdone] = true;
@@ -925,6 +956,7 @@ async function dosave() {
             delete sries.sections[i][appdone];
     switch (app) {
         case app_ww:
+            settings.markercolor = document.getElementById("nlcolor").value;
             for (let i = 0; i < sries.sections.length; i++)
                 if (sections[i].markers.length)
                     // sries.sections[i].markers = sections[i].markers;
@@ -933,6 +965,7 @@ async function dosave() {
                     delete sries.sections[i].markers;
             break;
         case app_lz:
+            settings.markercolor = document.getElementById("ancolor").value;
             for (let i = 0; i < sries.sections.length; i++)
                 if (sections[i].poi.length)
                     sries.sections[i].poi = sections[i].poi;
