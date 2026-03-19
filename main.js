@@ -449,6 +449,7 @@ function dispatchSection(section) {
                 default:
                     throw app + "?";
             }
+            fs_alter();
             drawImage();
             return;
         }
@@ -553,6 +554,7 @@ function dispatchSection(section) {
                                     idx = i;
                             }
                             if (idx !== undefined) {
+                                fs_alter();
                                 markers.splice(idx, 1);
                                 triangulate();
                                 drawImage();
@@ -569,6 +571,7 @@ function dispatchSection(section) {
                                     idx = i;
                             }
                             if (idx !== undefined) {
+                                fs_alter();
                                 poi.splice(idx, 1);
                                 drawImage();
                             }
@@ -619,6 +622,7 @@ function dispatchSection(section) {
                                             C = markers[ci - 4];
                                         else
                                             C = {x: vertices[ci][0], y: vertices[ci][1]};
+                                        fs_alter();
                                         markers.push({
                                             x: A.x + (B.x - A.x) * uv1[0] + (C.x - A.x) * uv1[1],
                                             y: A.y + (B.y - A.y) * uv1[0] + (C.y - A.y) * uv1[1],
@@ -632,6 +636,7 @@ function dispatchSection(section) {
                                 }
                                 if (D) {
                                     //                                    console.log("!");
+                                    fs_alter();
                                     markers.push({x: cursor.imagex, y: cursor.imagey, nx: cursor.imagex, ny: cursor.imagey});
                                 }
                                 const bughunt=JSON.stringify(markers[markers.length-1]);
@@ -645,6 +650,7 @@ function dispatchSection(section) {
                             }
                             break;
                         case app_lz:
+                            fs_alter();
                             poi.push({x: cursor.imagex, y: cursor.imagey});
                             drawImage();
                             break;
@@ -993,6 +999,7 @@ async function dosave() {
         },
         body: JSON.stringify(sries)
     });
+    fs_saved();
 }
 
 
@@ -1132,11 +1139,12 @@ function clearMarkers() {
     markers.splice(0);
     triangulate();
     drawImage();
-    const active=fs_data.active;
-    active.classList.add("notdone");
-    active.classList.remove("done");
-    active.getElementsByTagName("input")[0].checked=false;
-    delete fs_data.iconmap.get(active).wwdone;
+    fs_alter();
+//    const active=fs_data.active;
+//    active.classList.add("notdone");
+//    active.classList.remove("done");
+//    active.getElementsByTagName("input")[0].checked=false;
+//    delete fs_data.iconmap.get(active).wwdone;
 }
 
 function clearAllMarkers() {
@@ -1145,7 +1153,10 @@ function clearAllMarkers() {
             div.classList.add("notdone");
             div.classList.remove("done");
             div.getElementsByTagName("input")[0].checked=false;
-            section.markers.splice(0);
+            if(section.markers.length) {
+                div.classList.add("notsaved");
+                section.markers.splice(0);
+            }
             delete section.wwdone;
         }
         triangulate();

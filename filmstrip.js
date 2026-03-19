@@ -1,3 +1,4 @@
+const fs_width = 160;
 const fs_data = {
     iconmap: new Map,
     observer: new IntersectionObserver(loader),
@@ -34,8 +35,8 @@ function fs_redraw() {
         overlay.onclick = fs_activate;
         overlay.style.opacity = opacity;
         overlay.className = "icnv";
-        const w = icon.width = overlay.width = 128;
-        const h = icon.height = overlay.height = 128 * item.height / item.width;
+        const w = icon.width = overlay.width = fs_width;
+        const h = icon.height = overlay.height = fs_width * item.height / item.width;
         div.appendChild(icon);
         div.appendChild(overlay);
         const checkbox = document.createElement("input");
@@ -60,6 +61,20 @@ function fs_redraw() {
     }
 }
 
+function fs_alter() {
+    fs_data.active.classList.remove("done");
+    fs_data.active.classList.add("notdone");
+    fs_data.active.classList.add("notsaved");
+    delete fs_data.iconmap.get(fs_data.active)[appdone];
+    fs_data.active.children[2].checked=false;
+}
+
+function fs_saved() {
+    for(let [div] of fs_data.iconmap) {
+        div.classList.remove("notsaved");
+    }
+}
+
 function fs_done(event) {
     const target = event.target.parentElement;
     if(event.target.checked){
@@ -73,6 +88,8 @@ function fs_done(event) {
     }
     if(args.embedded)
         dosave();
+    else
+        target.classList.add("notsaved");
 }
 
 function fs_activate(event, scroll) {
@@ -112,7 +129,7 @@ async function loader(entries) {
                 height = (height + 1) >> 1;
             }
             const icon = await getTile(image, maxlevel - level, 0, 0);
-            div.firstElementChild.getContext("2d").drawImage(icon, 0, 0, 128, height * 128 / width);
+            div.firstElementChild.getContext("2d").drawImage(icon, 0, 0, fs_width, height * fs_width / width);
         }
 }
 
